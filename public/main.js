@@ -25,12 +25,12 @@ $(function() {
   var socket = io();
   // console.log(socket);
 
-  let myClientIndex;
+  let myClientID;
 
   // the socket.on() functions are receiving calls from the server
-  socket.on('connection', function (clientIndex) {
-    myClientIndex = clientIndex;
-    console.log('you are connected, client ',clientIndex);
+  socket.on('connection', function (clientID) {
+    myClientID = clientID;
+    console.log('you are connected, client ', myClientID);
   });
 
   socket.on('new data', function (data) {
@@ -44,9 +44,9 @@ $(function() {
   });
 
 
-  socket.on('disconnect', function () {
+  socket.on('disconnect', function (myClientID) {
     // socket.emit is calling functions on the server from the client side
-    socket.emit('disconnect');
+    socket.emit('disconnect', myClientID);
   });
 
   // updateData is called when a client interacts with the UI target

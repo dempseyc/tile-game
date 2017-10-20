@@ -152,26 +152,25 @@ let games = [];
 games.push(JSON.parse(JSON.stringify(gameInit())));
 
 let data = {
-  numClients: 0,
   shared: "some data",
   games: games
 }
 
+let ID = -1;
+
 // io is opening a closure where client side functions calls can be received
 io.on('connection', function (socket) {
-
+  ID++;
   clients.push(socket);
-  data.numClients += 1;
-  console.log(`client socket connected numClients = ${data.numClients}`);
-  socket.emit('connection', data.numClients);
+  console.log(`client socket connected number of clients = ${clients.length}`);
+  socket.emit('connection',  ID );
   socket.emit('get game data', data.games[0]);
 
   // in the server here, socket.on() functions are recieving calls from the clients
-  socket.on('disconnect', function () {
-    let clientIndex = clients.indexOf(socket);
-    clients.splice(clientIndex, 1);
-    data.numClients -= 1;
-    console.log(`client ${clientIndex} disconected numClients = ${data.numClients}`);
+  socket.on('disconnect', function (clientID) {
+    let theClientID = clientID;
+    // clients.splice(theClientID, 1);
+    console.log(`client ${theClientID} disconected, number of clients = ${clients.length}`);
   });
 
   socket.on('client action', function (data) {
