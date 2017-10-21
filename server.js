@@ -4,6 +4,13 @@ const path = require('path');
 const server = require('http').createServer(app);
 const port = process.env.PORT || 3000;
 
+// routing
+app.use(express.static(path.join(__dirname, 'public')));
+
+// config
+// add middlewares here
+app.set('view engine','html');
+
 ///////////////////////////////////////////////////
 ///////////////////////////////////////////////////
 
@@ -130,24 +137,19 @@ let gameInit = function () {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 
-//io automatically updates an io.sockets object, btw
+// socket stuff
+
+// io automatically updates an io.sockets object, btw
 const io = require('socket.io')(server);
 
 server.listen(port, function () {
   console.log(`server listening at port ${port}`);
 });
 
-// routing
-app.use(express.static(path.join(__dirname, 'public')));
-
-// config
-// add middlewares here
-app.set('view engine','html');
 
 // a place for server data
 let clients = [];
 
-//json .parse .stringify stuff copies the obj returned from gameInit
 
 let serverGameData = {
   games: []
@@ -158,6 +160,7 @@ let ID;
 // io.sockets is opening a closure where client side functions calls can be received
 io.sockets.on('connection', function (socket) {
 
+  // in this use, i could increment, instead of pushing clients, possibly
   clients.push(socket);
 
   ID = socket.id;
@@ -165,11 +168,13 @@ io.sockets.on('connection', function (socket) {
   console.log(`client socket connected number of clients = ${clients.length}`);
   socket.emit('connection',  ID );
 
+  // in the server here, socket.on() functions are recieving calls from the clients
   socket.on('subscribe', function(room){
     socket.emit('get player number', clients.length);
     socket.join(room);
     console.log("joining room", room);
     if (clients.length===2) {
+      // json .parse .stringify stuff copies the obj returned from gameInit
       serverGameData.games.push(JSON.parse(JSON.stringify(gameInit())));
       console.log("game initiated");
       io.sockets.emit('get game data', serverGameData.games[0]);
@@ -181,12 +186,11 @@ io.sockets.on('connection', function (socket) {
     socket.leave(room);
   });
 
-  socket.on('update game data', function(data) {
+  socket.on('update game data', function(data) {  // relies on data.room, should nest?
     console.log('move being made', data);  // data here should be the same as game
     io.sockets.in(data.room).emit('get game data', data);
   });
 
-  // in the server here, socket.on() functions are recieving calls from the clients
   socket.on('disconnect', function (clientID) {
     clients.splice(clientID, 1);
     console.log(`client ${clientID} disconected, number of clients = ${clients.length}`);
