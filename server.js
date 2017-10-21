@@ -172,7 +172,7 @@ io.sockets.on('connection', function (socket) {
     if (clients.length===2) {
       serverGameData.games.push(JSON.parse(JSON.stringify(gameInit())));
       console.log("game initiated");
-      socket.emit('get game data', serverGameData.games[0]);
+      io.sockets.emit('get game data', serverGameData.games[0]);
     }
   });
 

@@ -55,7 +55,8 @@ $(function() {
 // or when the OTHER player makes a move
   socket.on('get game data', function (data) {
     myGameData = data;
-    console.log(myGameData, "player", iAmPlayer);
+    // console.log(myGameData, "player", iAmPlayer);
+    console.log("iAmPlayer", iAmPlayer);
   });
 
 
