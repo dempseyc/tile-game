@@ -4,7 +4,7 @@ $(function() {
   let $uiTargets = $('#ui-targets');
   let $dataDisplay = $('#data-display');
 
-  let sharedData = "";
+  let newGameData = "";
 
   let gameData = {};
 
@@ -14,45 +14,61 @@ $(function() {
 // code fires the shared data update on submit
   target.submit(function( event ) {
     event.preventDefault();
-    sharedData = target.find('input[name="message"]').val();
-    updateData(sharedData);
+    newGameData = target.find('input[name="message"]').val();
+    updateData(newGameData);
   });
 
+////////////////////////////////where to put this...
 
   $body.add(target);  // is this line really needed jquery thing?
   $uiTargets.append(target);
 
-  var socket = io();
+  var socket = io.connect();
   // console.log(socket);
 
   let myClientID;
+  let myRoom = "roomOne";
+  let iAmPlayer = "";
+  let myGameData = {};
 
   // the socket.on() functions are receiving calls from the server
-  socket.on('connection', function (clientID) {
-    myClientID = clientID;
+  // socket.emit() is calling functions on the server from the client side
+
+  socket.on('connection', function (ID) {
+    myClientID = ID;
     console.log('you are connected, client ', myClientID);
+    socket.emit('subscribe', myRoom);
   });
 
-  socket.on('new data', function (data) {
+  socket.on('get player number', function (num) {
+    iAmPlayer = num;
+  });
+
+// update game data will be called by server when THIS player makes a move
+  socket.on('update game data', function (data) {
+    myGameData = data;
     $dataDisplay.html(data);
+    socket.emit('move made', )
   });
 
+// get game data will be called by server when both players are present
+// or when the OTHER player makes a move
   socket.on('get game data', function (data) {
-    // here is where we set the game state and render the display in a way
-    let gameData = data;
-    console.log(gameData);
+    myGameData = data;
+    console.log(myGameData, "player", iAmPlayer);
   });
 
 
   socket.on('disconnect', function (myClientID) {
-    // socket.emit is calling functions on the server from the client side
+    socket.emit('unsubscribe', myRoom)
     socket.emit('disconnect', myClientID);
   });
 
-  // updateData is called when a client interacts with the UI target
-  // data is shared with all clients through the server
+
+  // data in this function should be all game data
   function updateData (data) {
-    socket.emit('client action', data);
+    socket.emit('update game data', function (data) {
+    })
   }
 
 });

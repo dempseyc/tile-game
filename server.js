@@ -147,34 +147,49 @@ app.set('view engine','html');
 // a place for server data
 let clients = [];
 
-let games = [];
 //json .parse .stringify stuff copies the obj returned from gameInit
-games.push(JSON.parse(JSON.stringify(gameInit())));
 
-let data = {
-  shared: "some data",
-  games: games
+let serverGameData = {
+  games: []
 }
 
-let ID = -1;
+let ID;
 
-// io is opening a closure where client side functions calls can be received
-io.on('connection', function (socket) {
-  ID++;
+// io.sockets is opening a closure where client side functions calls can be received
+io.sockets.on('connection', function (socket) {
+
   clients.push(socket);
+
+  ID = socket.id;
+
   console.log(`client socket connected number of clients = ${clients.length}`);
   socket.emit('connection',  ID );
-  socket.emit('get game data', data.games[0]);
+
+  socket.on('subscribe', function(room){
+    socket.emit('get player number', clients.length);
+    socket.join(room);
+    console.log("joining room", room);
+    if (clients.length===2) {
+      serverGameData.games.push(JSON.parse(JSON.stringify(gameInit())));
+      console.log("game initiated");
+      socket.emit('get game data', serverGameData.games[0]);
+    }
+  });
+
+  socket.on('unsubscribe', function(room) {
+    console.log('leaving room', room);
+    socket.leave(room);
+  });
+
+  socket.on('update game data', function(data) {
+    console.log('move being made', data);  // data here should be the same as game
+    io.sockets.in(data.room).emit('get game data', data);
+  });
 
   // in the server here, socket.on() functions are recieving calls from the clients
   socket.on('disconnect', function (clientID) {
-    let theClientID = clientID;
-    // clients.splice(theClientID, 1);
-    console.log(`client ${theClientID} disconected, number of clients = ${clients.length}`);
+    clients.splice(clientID, 1);
+    console.log(`client ${clientID} disconected, number of clients = ${clients.length}`);
   });
 
-  socket.on('client action', function (data) {
-    // io.sockets.emit is calling functions on the client side
-    io.sockets.emit('new data', data);
-  })
 });
