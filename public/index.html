@@ -1,20 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang= "en" >
 <head>
-  <meta charset="UTF-8">
-  <title>a socket.io template</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset= "UTF-8" >
+  <title>NODE CAPTOR</title>
+  <link rel= "stylesheet" href= "style.css" >
 </head>
 <body>
-  <div id= "data-display">
+  <div id= "data-display" >
+    <div class= "title">NODE CAPTOR</div>
+    <div class= "player">
+      <div class= "player-number player-turn" ></div>
+    </div> <!-- players -->
 <!--   in this app, ui targets exist within the
   data display -->
-    <div id= "ui-targets">
+    <div id= "ui-targets" >
+      <div id= "hand-grid" ></div>
+      <div id= "board-grid" ></div>
     </div>
   </div>
 
-  <script src= "https://code.jquery.com/jquery-1.10.2.min.js"></script>
-  <script src= "/socket.io/socket.io.js"></script>
-  <script src= "/main.js"></script>
+  <script src= "https://code.jquery.com/jquery-1.10.2.min.js" ></script>
+  <script src= "/socket.io/socket.io.js" ></script>
+  <script src= "/main.js" ></script>
 </body>
 </html>

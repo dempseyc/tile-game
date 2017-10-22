@@ -128,6 +128,7 @@ let gameInit = function () {
     game.player1 = buildPlayer(1);
     game.player2 = buildPlayer(2);
     game.board = buildBoard(15);
+    // game.whosturn = 1 initially
     return game;
   }
 
@@ -177,7 +178,7 @@ io.sockets.on('connection', function (socket) {
       // json .parse .stringify stuff copies the obj returned from gameInit
       serverGameData.games.push(JSON.parse(JSON.stringify(gameInit())));
       console.log("game initiated");
-      io.sockets.emit('get game data', serverGameData.games[0]);
+      io.sockets.emit('start game', serverGameData.games[0]);
     }
   });
 
@@ -188,7 +189,7 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('update game data', function(data) {  // relies on data.room, should nest?
     console.log('move being made', data);  // data here should be the same as game
-    io.sockets.in(data.room).emit('get game data', data);
+    io.sockets.in(data.room).emit('get new game data', data);
   });
 
   socket.on('disconnect', function (clientID) {
