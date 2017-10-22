@@ -80,9 +80,10 @@ $(function() {
   let Hand = $('#hand-grid');
   let Board = $('#board-grid');
 
-  // storage for new jquery things
+  // storage for new jquery elements
   let HandTiles = [];
   let PlayerDeck = [];
+  let BaseContainer = $('<div class= "base-container" ></div>');
   let Bases = [];
 
   // jq dom elements
@@ -128,11 +129,31 @@ $(function() {
 
       // console.log("in dealHand, iAmPlayer=",iAmPlayer);
       console.log(gameData);
-
-
     }
 
     dealHand(gameData);
+
+    let drawBases = function(gameData) {
+      let bases = gameData.board.bases;
+      bases.forEach((base,i) => {
+        console.log(base);
+        let top = 30*base.split('-')[0]-5;
+        let left = 30*base.split('-')[1]-5;
+        let jq = $(`<div class= "base" id= "b-${i}" profile= "${base}" >`);
+        jq.css('left', left);
+        jq.css('top', top);
+        BaseContainer.append(jq);
+        Bases.push(jq);
+      });
+      Board.append(BaseContainer);
+    }
+
+    drawBases(gameData);
+    //dealDeck(gameData); ??
+    // ???????  after all this is set up, i can send only moves over server??
+    // no server will need to update bases captured also
+    // win state when majority of bases are captured
+    // maybe register your win with initials
 
   } // startGame
 
