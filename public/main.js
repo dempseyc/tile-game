@@ -27,47 +27,49 @@ $(function() {
   // console.log(socket);
 
   let myClientID;
-  let myRoom = "roomOne";
+  let myRoom = "room one";
   let iAmPlayer;
-  let myGameData = {};
+  let myGameData = {}; // my deck, my hand, my board
 
   // the socket.on() functions are receiving calls from the server
   // socket.emit() is calling functions on the server from the client side
 
   socket.on('connection', function (ID) {
-    myClientID = ID;
+    myClientID = ID;  // this is socket.id
     console.log('you are connected, client ', myClientID);
     socket.emit('subscribe', myRoom);
   });
 
+  socket.on('disconnect', function (myClientID) {
+    socket.emit('unsubscribe', myRoom);
+    socket.emit('disconnect', myClientID);
+  });
+
+  // we dont want server to initiate game start, only mediate it
+
   socket.on('get player number', function (num) {
-    iAmPlayer = num;
+    iAmPlayer = num;  // emit with player number to specify data from server
   });
 
 // start game will be called by server when BOTH players are present
   socket.on('start game', function (data) {
     //startGame should do jquery stuff populating bases and hand tiles
     startGame(data);
-    myGameData = data;
-    // console.log("myGameData", myGameData);
-    console.log("iAmPlayer", iAmPlayer);
-
+    myGameData = data; // be specific as to data from server side
   });
 
-// get game data will be called by server when the OTHER player makes a move
+// get new game data will be called by server when the OTHER player makes a move
   socket.on('get new game data', function (data) {
     myGameData = data;
-
     //call a function that does jquery stuff populating board
-  })
-
-  socket.on('disconnect', function (myClientID) {
-    socket.emit('unsubscribe', myRoom)
-    socket.emit('disconnect', myClientID);
   });
 
-  // data in this function should be all game data
+
+  // data argument in this function should be all my game data
+  // is it redundant to update myGameData separately?
   function updateData (data) {
+    // because data.room needed by server for now
+    data.room = myRoom;
     socket.emit('update game data', data);
   }
 
@@ -80,7 +82,7 @@ $(function() {
   let Hand = $('#hand-grid');
   let Board = $('#board-grid');
 
-  // storage for new jquery elements
+  // storage for new needed jquery elements
   let HandTiles = [];
   let PlayerDeck = [];
   let BaseContainer = $('<div class= "base-container" ></div>');
@@ -128,7 +130,7 @@ $(function() {
       })
 
       // console.log("in dealHand, iAmPlayer=",iAmPlayer);
-      console.log(gameData);
+      // console.log(gameData);
     }
 
     dealHand(gameData);
@@ -137,8 +139,8 @@ $(function() {
       let bases = gameData.board.bases;
       bases.forEach((base,i) => {
         console.log(base);
-        let top = 30*base.split('-')[0]-5;
-        let left = 30*base.split('-')[1]-5;
+        let top = 30*base.split('-')[0]-7;
+        let left = 30*base.split('-')[1]-7;
         let jq = $(`<div class= "base" id= "b-${i}" profile= "${base}" >`);
         jq.css('left', left);
         jq.css('top', top);

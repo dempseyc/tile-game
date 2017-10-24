@@ -150,26 +150,30 @@ server.listen(port, function () {
 
 // a place for server data
 let clients = [];
-
-
+let rooms = [];
 let serverGameData = {
   games: []
 }
 
-let ID;
-
 // io.sockets is opening a closure where client side functions calls can be received
 io.sockets.on('connection', function (socket) {
 
-  // in this use, i could increment, instead of pushing clients, possibly
+  let ID = socket.id;
+
   clients.push(socket);
 
-  ID = socket.id;
+  // in the server here, socket.on() functions are recieving calls from the clients
+  socket.on('disconnect', function (clientID) {
+    clients.splice(clientID, 1);
+    console.log(`client ${clientID} disconected, number of clients = ${clients.length}`);
+  });
 
   console.log(`client socket connected number of clients = ${clients.length}`);
   socket.emit('connection',  ID );
 
-  // in the server here, socket.on() functions are recieving calls from the clients
+
+  // why is room given by client?  it should be assigned by server
+  // in build 2 it will be so
   socket.on('subscribe', function(room){
     socket.emit('get player number', clients.length);
     socket.join(room);
@@ -178,6 +182,8 @@ io.sockets.on('connection', function (socket) {
       // json .parse .stringify stuff copies the obj returned from gameInit
       serverGameData.games.push(JSON.parse(JSON.stringify(gameInit())));
       console.log("game initiated");
+
+      // where start game is emitted, will need playernum in build 2
       io.sockets.emit('start game', serverGameData.games[0]);
     }
   });
@@ -187,14 +193,13 @@ io.sockets.on('connection', function (socket) {
     socket.leave(room);
   });
 
-  socket.on('update game data', function(data) {  // relies on data.room, should nest?
-    console.log('move being made', data);  // data here should be the same as game
+  socket.on('update game data', function(data) {
+    // relies on data.room, added that in client script... is it working?
+    console.log('Making my move!', data);  // data here should be the same as game
     io.sockets.in(data.room).emit('get new game data', data);
   });
 
-  socket.on('disconnect', function (clientID) {
-    clients.splice(clientID, 1);
-    console.log(`client ${clientID} disconected, number of clients = ${clients.length}`);
-  });
-
 });
+
+// rebuild notes for later,
+

@@ -43,8 +43,10 @@ body {
   position: absolute;
   width : 10px;
   height: 10px;
-  background: #008;
+  background: #DD0;
   font-size: 0.3em;
+  border: 2px solid #A4D;
+  border-radius: 10px;
 }
 
 #hand-grid {
