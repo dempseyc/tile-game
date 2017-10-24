@@ -10,7 +10,7 @@ body {
   line-height: 1em;
 }
 
-.rotate-button {
+#rotate-button {
   background-color: white;
   height: 30px;
   width: 30px;
@@ -30,6 +30,14 @@ body {
   border: 2px solid white;
   margin: -2px -2px -2px -2px;
   float: left;
+}
+
+.tile {
+  height: 30px;
+  width: 30px;
+/*  border: 2px solid white;*/
+/*border determined by jq stuff*/
+  margin: -2px -2px -2px -2px;
 }
 
 .base-container {

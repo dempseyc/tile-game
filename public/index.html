@@ -8,19 +8,21 @@
 <body>
   <div id= "data-display" >
     <div class= "title">NODE CAPTOR</div>
-    <div class= "player">
-      <div class= "player-number player-turn" ></div>
-    </div> <!-- players -->
-<!--   in this app, ui targets exist within the
-  data display -->
+    <div class= "player-number" ></div>
+    <div class= "player-turn" ></div>
+
     <div id= "ui-targets" >
-      <div id= "hand-grid" ></div>
+      <div id= "hand-grid" >
+        <button id= "rotate-button" >0º</button>
+      </div>
       <div id= "board-grid" ></div>
     </div>
+    <!-- /ui-targets -->
   </div>
+  <!-- /data-display -->
 
-  <script src= "https://code.jquery.com/jquery-1.10.2.min.js" ></script>
   <script src= "/socket.io/socket.io.js" ></script>
+  <script src= "/jquery.js" ></script>
   <script src= "/main.js" ></script>
 </body>
 </html>

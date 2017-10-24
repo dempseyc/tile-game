@@ -195,6 +195,8 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('update game data', function(data) {
     // relies on data.room, added that in client script... is it working?
+    // how to test this?
+
     console.log('Making my move!', data);  // data here should be the same as game
     io.sockets.in(data.room).emit('get new game data', data);
   });
