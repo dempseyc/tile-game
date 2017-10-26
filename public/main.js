@@ -75,8 +75,11 @@
 
   // cache jquery UI targets
   let Hand = $('#hand-grid');
-  let RotateButton = $('#rotate-button');
   let Board = $('#board-grid');
+  let RotateButton = $('#rotate-button');
+  let rotation = 0;
+  RotateButton.text(rotation+"º");
+
 
   // storage for new needed jquery elements
   // rather, there would be MyGameData obj storing all this stuff
@@ -132,12 +135,11 @@
         let left = size*i;
         let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`);
         jq.css('left', left);
-        // jq.css('transform:rotate', rot); // i could do this forever
-        // it'd be nice, but...
-        // jq.css('transition', "transform 0.5s"); // something like this
+        tile.rotation = 0;
+        jq.css('transform', 'rotate('+tile.rotation+'deg)');
+        jq.css('transition', 'transform 0.5s');
         tile.id = i;
         tile.jq = jq;
-        tile.rotation = 0;
         Hand.append(jq);  // we have put els on the DOM
         MyHand.push(tile);
       };
@@ -152,10 +154,13 @@
       console.log(hand);
 
       MyHand.forEach((tile,i) => {
+        tile.type = hand[i].type;
+        tile.code = hand[i].code;
+        tile.rotcode = hand[i].rotcode;
+        tile.name = hand[i].name;
         let jq = tile.jq;
-        let imgClassName = `p${iAmPlayer}${hand[i].name}`;
+        let imgClassName = `p${iAmPlayer}${tile.name}`;
         tile.img = imgClassName;
-        //////////////////////////////////////this is where it doesn't work the index
         jq.addClass(imgClassName);
       })
     };
@@ -188,6 +193,30 @@
 // Click Events
 //
 ///////////////////////////////////////////////////////////////////////////////////////
+
+
+RotateButton.click(rotateTiles);
+
+function rotateString(str) {
+  let len = str.length;
+  let last = str.substring(len-1);
+  let first = str.substring(0,len-1);
+  return last + first;
+}
+
+function rotateTiles () {
+  rotation+=90;
+  if (rotation===360){rotation=0;}
+  RotateButton.text(rotation+"º");
+  console.log("rotate called");
+  MyHand.forEach((tile,i) => {
+    jq = tile.jq;
+    tile.rotation = rotation;
+    tile.rotcode = rotateString(tile.rotcode);
+    console.log(tile.rotcode);
+    jq.css('transform', 'rotate('+rotation+'deg)');
+  });
+}
 
 
 // pre-requisites
