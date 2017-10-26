@@ -169,23 +169,36 @@ io.sockets.on('connection', function (socket) {
   });
 
   console.log(`client socket connected number of clients = ${clients.length}`);
-  socket.emit('connection',  ID );
-
+  socket.emit('connection', ID );
 
   // why is room given by client?  it should be assigned by server
-  // in build 2 it will be so
+
   socket.on('subscribe', function(room){
-    socket.emit('get player number', clients.length);
+    let playerNumber = clients.length;
+    socket.emit('get player number', playerNumber);
     socket.join(room);
     console.log("joining room", room);
-    if (clients.length===2) {
-      // json .parse .stringify stuff copies the obj returned from gameInit
-      serverGameData.games.push(JSON.parse(JSON.stringify(gameInit())));
-      console.log("game initiated");
-
-      // where start game is emitted, will need playernum in build 2
-      io.sockets.emit('start game', serverGameData.games[0]);
+    // is this really just making a copy of the data?
+    serverGameData.games.push(JSON.parse(JSON.stringify( gameInit() ) ) );
+    console.log("game initiated on server");
+    if (clients.length===2){
+      io.sockets.in(room).emit('get game data');
     }
+  });
+
+  socket.on('get new game data', function(playerNumber){
+    // console.log(serverGameData.games[0], "in get new game data");
+      let playerData = {};
+      playerData.playerNum = playerNumber;
+      playerData.board = serverGameData.games[0].board;
+      if (playerNumber===1){
+        playerData.player = serverGameData.games[0].player1;
+      } else if (playerNumber===2){
+        playerData.player = serverGameData.games[0].player2;
+      } else {
+        console.log("no player number in get new game data");
+      }
+      socket.emit('start game', playerData);
   });
 
   socket.on('unsubscribe', function(room) {
@@ -198,7 +211,7 @@ io.sockets.on('connection', function (socket) {
     // how to test this?
 
     console.log('Making my move!', data);  // data here should be the same as game
-    io.sockets.in(data.room).emit('get new game data', data);
+    io.sockets.in(data.room).emit('get game data', data);
   });
 
 });

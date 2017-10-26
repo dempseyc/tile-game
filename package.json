@@ -8,6 +8,7 @@
   "license": "cLLd",
   "dependencies": {
     "express": "4.13.4",
+    "jquery-ui": "^1.12.1",
     "socket.io": "^2.0.3"
   },
   "scripts": {

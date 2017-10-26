@@ -29,7 +29,7 @@
   let myClientID;
   let myRoom = "room one";
   let iAmPlayer;
-  let myGameData = {}; // my deck, my hand, my board
+  let myGameData = {}; // my deck, my hand, the board, the bases
 
   // the socket.on() functions are receiving calls from the server
   // socket.emit() is calling functions on the server from the client side
@@ -45,25 +45,20 @@
     socket.emit('disconnect', myClientID);
   });
 
-  // we dont want server to initiate game start, only mediate it
-
   socket.on('get player number', function (num) {
-    iAmPlayer = num;  // in build 2 emit with player number to specify data from server
+    iAmPlayer = num;
+    console.log("iAmPlayer", iAmPlayer);
   });
 
-// start game will be called by server when BOTH players are present
-  socket.on('start game', function (data) {
+  socket.on('get game data', function () {
+    socket.emit('get new game data', iAmPlayer);
+  });
+
+  socket.on('start game', function (playersData) {
     //startGame should do jquery stuff populating bases and hand tiles
-    startGame(data);
-    myGameData = data; // be specific as to data from server side
+    myGameData = playersData;
+    startGame();
   });
-
-// get new game data will be called by server when the OTHER player makes a move
-  socket.on('get new game data', function (data) {
-    myGameData = data;
-    //call a function that does jquery stuff populating board
-  });
-
 
   // data argument in this function should be all my game data
   // is it redundant to update myGameData separately?
@@ -84,15 +79,31 @@
   let Board = $('#board-grid');
 
   // storage for new needed jquery elements
-  let HandJQ = [];
+  // rather, there would be MyGameData obj storing all this stuff
+  let MyHand = [];
   let PlayerDeck = [];
   let BaseContainer = $('<div class= "base-container" ></div>');
   let Bases = [];
 
 // jq dom elements
- let startGame = function (gameData) {
+ let startGame = function () {
 
+    // rather, I would copy gameData and add jquery elements to it,
+    // then have functions draw from that gameData and mutate it based on
+    // player actions or server info...
     //what classes would you have
+
+    // Base
+      // this.locX
+      // this.locY
+      // this.ownedBy
+
+    // BoardCell
+      // this.tile
+      // this.profile
+      // this.locX
+      // this.locY
+
     // Tile
       // this.player
       // this.rotation
@@ -117,37 +128,43 @@
 
     let drawHandCells = function (player,size,num,rot) {
       for (i=0;i<num;i++){
+        let tile = {};
         let left = size*i;
         let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`);
         jq.css('left', left);
         // jq.css('transform:rotate', rot); // i could do this forever
         // it'd be nice, but...
         // jq.css('transition', "transform 0.5s"); // something like this
+        tile.id = i;
+        tile.jq = jq;
+        tile.rotation = 0;
         Hand.append(jq);  // we have put els on the DOM
-        HandJQ.push(jq);  // we have stored their refs in an array
+        MyHand.push(tile);
       };
     };
 
     drawHandCells(iAmPlayer, 30, 4, 0);
 
-    let dealHand = function(gameData) {
-      let hand;
-      if (iAmPlayer===1) {
-        hand = gameData.player1.hand;
-      } else {
-        hand = gameData.player2.hand;
-      }
+    let dealHand = function() {
+      // console.log(JSON.stringify(gameData) + " in dealHand");
+      let hand = myGameData.player.hand;
 
-      HandJQ.forEach((jqcell,i) => {
-        jqcell.addClass(`p${iAmPlayer}${hand[i].name}`);
+      console.log(hand);
+
+      MyHand.forEach((tile,i) => {
+        let jq = tile.jq;
+        let imgClassName = `p${iAmPlayer}${hand[i].name}`;
+        tile.img = imgClassName;
+        //////////////////////////////////////this is where it doesn't work the index
+        jq.addClass(imgClassName);
       })
     };
 
-    dealHand(gameData);
+    dealHand();
 
-    let drawBases = function(gameData) {
+    let drawBases = function() {
       // this is fine for drawing bases, but what about updating base color and owner?
-      let bases = gameData.board.bases;
+      let bases = myGameData.board.bases;
       bases.forEach((base,i) => {
         console.log(base);
         let top = 30*base.split('-')[0]-7;
@@ -161,7 +178,7 @@
       Board.append(BaseContainer);
     };
 
-    drawBases(gameData);
+    drawBases();
 }; // startGame
 
 ///////////////////////////////////////////////////////////////////////////////////////
