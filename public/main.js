@@ -73,6 +73,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+
   // cache jquery UI targets
   let Hand = $('#hand-grid');
   let Board = $('#board-grid');
@@ -82,19 +83,85 @@
 
 
   // storage for new needed jquery elements
-  // rather, there would be MyGameData obj storing all this stuff
   let MyHand = [];
   let PlayerDeck = [];
   let BaseContainer = $('<div class= "base-container" ></div>');
   let Bases = [];
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//
+// Click Events
+//
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+RotateButton.click(rotateTiles);
+
+function rotateString(str) {
+  let len = str.length;
+  let last = str.substring(len-1);
+  let first = str.substring(0,len-1);
+  return last + first;
+}
+
+function rotateTiles () {
+  rotation+=90;
+  if (rotation===360){rotation=0;}
+  RotateButton.text(rotation+"º");
+  console.log("rotate called");
+  MyHand.forEach((tile,i) => {
+    jq = tile.jq;
+    tile.rotation = rotation;
+    tile.rotcode = rotateString(tile.rotcode);
+    console.log(tile.rotcode);
+    jq.css('transform', 'rotate('+rotation+'deg)');
+  });
+}
+
+    // repaint button
+  REPAINT = $('#re-paint')
+  REPAINT.click(function(){
+    startGame();
+  });
+
+function newTile(i) {
+  let tile = PlayerDeck.pop();
+  // let left = size*i;
+  let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`)
+    .draggable({
+      helper: "clone"
+    });
+  let imgClassName = `p${iAmPlayer}${tile.name}`;
+  tile.img = imgClassName;
+  jq.addClass(imgClassName);
+  tile.rotation = rotation;
+  jq.css('transform', 'rotate('+tile.rotation+'deg)');
+  jq.css('transition', 'transform 0.5s');
+  tile.id = i;
+  tile.jq = jq;
+  jq.insertAfter(`#hand-grid>div:nth-child(${i+1})`);
+  return tile;
+}
+
 // jq dom elements
  let startGame = function () {
 
-    // rather, I would copy gameData and add jquery elements to it,
-    // then have functions draw from that gameData and mutate it based on
-    // player actions or server info...
-    //what classes would you have
+   Hand.empty();
+   Board.empty();
+   BaseContainer.empty();
+   rotation = 0;
+   RotateButton.text(rotation+"º");
+   RotateButton.click(rotateTiles);
+   Hand.append(RotateButton);
+
+   MyHand = [];
+   PlayerDeck = [];
+   Bases = [];
+
+
+  // re-initialize stuff
 
     // Base
       // this.locX
@@ -119,7 +186,20 @@
         for (j=0;j<wide;j++){
           let left = size*j;
           let top = size*i;
-          let jq = $(`<div class= "cell board-cell" id="${j}-${i}" >`);
+          // defines a function that is called when draggable is dropped
+          let jq = $(`<div class= "cell board-cell" id="${j}-${i}" >`)
+            .droppable({
+              drop: function(e, ui){
+                console.log(e, ui, "in drop function");
+                let str = ui.draggable.attr('id');
+                let id = Number(str.split('-')[1]);
+                MyHand.splice(id,0, newTile(id));
+                MyHand.splice(id+1,1);
+                ui.draggable.removeClass('hand-cell');
+                ui.draggable.addClass('board-tile');
+                ui.draggable.detach().appendTo($(this));
+              }
+              });
           jq.css('left', left);
           jq.css('top', top);
           Board.append(jq);
@@ -132,9 +212,12 @@
     let drawHandCells = function (player,size,num,rot) {
       for (i=0;i<num;i++){
         let tile = {};
-        let left = size*i;
-        let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`);
-        jq.css('left', left);
+        // let left = size*i;
+        let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`)
+          .draggable({
+            helper: "clone"
+          });
+        // jq.css('left', left);
         tile.rotation = 0;
         jq.css('transform', 'rotate('+tile.rotation+'deg)');
         jq.css('transition', 'transform 0.5s');
@@ -146,6 +229,9 @@
     };
 
     drawHandCells(iAmPlayer, 30, 4, 0);
+
+    // btw
+    PlayerDeck = myGameData.player.deck;
 
     let dealHand = function() {
       // console.log(JSON.stringify(gameData) + " in dealHand");
@@ -185,38 +271,6 @@
 
     drawBases();
 }; // startGame
-
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-//
-// Click Events
-//
-///////////////////////////////////////////////////////////////////////////////////////
-
-
-RotateButton.click(rotateTiles);
-
-function rotateString(str) {
-  let len = str.length;
-  let last = str.substring(len-1);
-  let first = str.substring(0,len-1);
-  return last + first;
-}
-
-function rotateTiles () {
-  rotation+=90;
-  if (rotation===360){rotation=0;}
-  RotateButton.text(rotation+"º");
-  console.log("rotate called");
-  MyHand.forEach((tile,i) => {
-    jq = tile.jq;
-    tile.rotation = rotation;
-    tile.rotcode = rotateString(tile.rotcode);
-    console.log(tile.rotcode);
-    jq.css('transform', 'rotate('+rotation+'deg)');
-  });
-}
 
 
 // pre-requisites
