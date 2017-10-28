@@ -3,7 +3,6 @@
   // let $uiTargets = $('#ui-targets');
   // let $dataDisplay = $('#data-display');
 
-  let gameData = {};
 
   // replace this with messaging service
   // let target = $('<form>message:<br><input type="text" name="message"><input type="submit" value="Submit"></form>');
@@ -19,6 +18,7 @@
   // $body.add(target);
   // $uiTargets.append(target);
 
+  let gameData = {};
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 //// socket stuff in client
@@ -29,6 +29,7 @@
   let myClientID;
   let myRoom = "room one";
   let iAmPlayer;
+  let whosTurn = 1;
   let myGameData = {}; // my deck, my hand, the board, the bases
 
   // the socket.on() functions are receiving calls from the server
@@ -50,23 +51,41 @@
     console.log("iAmPlayer", iAmPlayer);
   });
 
-  socket.on('get game data', function () {
-    socket.emit('get new game data', iAmPlayer);
+  socket.on('get init data', function () {
+    socket.emit('get your game data', iAmPlayer);
   });
 
   socket.on('start game', function (playersData) {
-    //startGame should do jquery stuff populating bases and hand tiles
     myGameData = playersData;
     startGame();
   });
 
-  // data argument in this function should be all my game data
-  // is it redundant to update myGameData separately?
-  function updateData (data) {
-    // because data.room needed by server for now
-    data.room = myRoom;
-    socket.emit('update game data', data);
-  }
+  socket.on('get game data', function (data) {
+    if (whosTurn === 1) { whosTurn=2; } else { whosTurn=1; }
+    console.log('get game data called');
+    myGameData.board = data.board;
+    updateBoard();
+  });
+
+function updateBoard () {
+  myGameData.board.mat.forEach((row, i) => {
+    row.forEach((cell, j) => {
+      let target = $(`#${j}-${i}`);
+      if (cell.hasOwnProperty('img') && target.children().length === 0) {
+        let jq = $(`<div class= "cell board-tile ${cell.img}" >`);
+        jq.css('transform', 'rotate('+cell.rotation+'deg)');
+        target.append(jq);
+      }
+    });
+  });
+  console.log ("player "+whosTurn+"'s turn");
+}
+
+function sendMove (data) {
+  // because data.room needed by server for now
+  data.room = myRoom;
+  socket.emit('update game data', data);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,135 +160,125 @@ function newTile(i) {
   jq.css('transition', 'transform 0.5s');
   tile.id = i;
   tile.jq = jq;
-  jq.insertAfter(`#hand-grid>div:nth-child(${i+1})`);
+  if (i===0) {
+    jq.insertBefore(`#hand-grid div:eq(${i+1})`);
+  } else {
+    jq.insertAfter(`#hand-grid div:eq(${i})`);
+  }
   return tile;
 }
 
+function changeBoardData(tile,loc) {
+  let col = loc.split('-')[0];
+  let row = loc.split('-')[1];
+  tile.jq = {};
+  // let imgClassName = `p${iAmPlayer}${tile.name}`;
+  // tile.img = imgClassName;
+  // tile.rotation = rotation;
+  myGameData.board.mat[row][col] = tile;
+  sendMove(myGameData);
+}
+
+
 // jq dom elements
- let startGame = function () {
+let startGame = function () {
 
-   Hand.empty();
-   Board.empty();
-   BaseContainer.empty();
-   rotation = 0;
-   RotateButton.text(rotation+"º");
-   RotateButton.click(rotateTiles);
-   Hand.append(RotateButton);
-
-   MyHand = [];
-   PlayerDeck = [];
-   Bases = [];
-
-
-  // re-initialize stuff
-
-    // Base
-      // this.locX
-      // this.locY
-      // this.ownedBy
-
-    // BoardCell
-      // this.tile
-      // this.profile
-      // this.locX
-      // this.locY
-
-    // Tile
-      // this.player
-      // this.rotation
-      // this.name
-      // this.code
-      // this.rotcode //rotcode changes with rotation and changes css rotation transform
-
-    let drawBoardCells = function (size,wide,high) {
-      for (i=0;i<high;i++){
-        for (j=0;j<wide;j++){
-          let left = size*j;
-          let top = size*i;
-          // defines a function that is called when draggable is dropped
-          let jq = $(`<div class= "cell board-cell" id="${j}-${i}" >`)
-            .droppable({
-              drop: function(e, ui){
-                console.log(e, ui, "in drop function");
-                let str = ui.draggable.attr('id');
-                let id = Number(str.split('-')[1]);
-                MyHand.splice(id,0, newTile(id));
-                MyHand.splice(id+1,1);
-                ui.draggable.removeClass('hand-cell');
-                ui.draggable.addClass('board-tile');
-                ui.draggable.detach().appendTo($(this));
-              }
-              });
-          jq.css('left', left);
-          jq.css('top', top);
-          Board.append(jq);
-        }
-      }
-    };
-
-    drawBoardCells(30,15,15);
-
-    let drawHandCells = function (player,size,num,rot) {
-      for (i=0;i<num;i++){
-        let tile = {};
-        // let left = size*i;
-        let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`)
-          .draggable({
-            helper: "clone"
-          });
-        // jq.css('left', left);
-        tile.rotation = 0;
-        jq.css('transform', 'rotate('+tile.rotation+'deg)');
-        jq.css('transition', 'transform 0.5s');
-        tile.id = i;
-        tile.jq = jq;
-        Hand.append(jq);  // we have put els on the DOM
-        MyHand.push(tile);
-      };
-    };
-
-    drawHandCells(iAmPlayer, 30, 4, 0);
-
-    // btw
-    PlayerDeck = myGameData.player.deck;
-
-    let dealHand = function() {
-      // console.log(JSON.stringify(gameData) + " in dealHand");
-      let hand = myGameData.player.hand;
-
-      console.log(hand);
-
-      MyHand.forEach((tile,i) => {
-        tile.type = hand[i].type;
-        tile.code = hand[i].code;
-        tile.rotcode = hand[i].rotcode;
-        tile.name = hand[i].name;
-        let jq = tile.jq;
-        let imgClassName = `p${iAmPlayer}${tile.name}`;
-        tile.img = imgClassName;
-        jq.addClass(imgClassName);
-      })
-    };
-
-    dealHand();
-
-    let drawBases = function() {
-      // this is fine for drawing bases, but what about updating base color and owner?
-      let bases = myGameData.board.bases;
-      bases.forEach((base,i) => {
-        console.log(base);
-        let top = 30*base.split('-')[0]-7;
-        let left = 30*base.split('-')[1]-7;
-        let jq = $(`<div class= "base" id= "b-${i}" profile= "${base}" >`);
+  let drawBoardCells = function (size,wide,high) {
+    for (i=0;i<high;i++){
+      for (j=0;j<wide;j++){
+        let left = size*j;
+        let top = size*i;
+        // defines a function that is called when draggable is dropped
+        let jq = $(`<div class= "cell board-cell" id="${j}-${i}" >`)
+          .droppable({
+            drop: function(e, ui){
+              console.log(e, ui, "in drop function");
+              let str = ui.draggable.attr('id');
+              let id = Number(str.split('-')[1]);
+              let droppedTile = MyHand[id];
+              let loc = $(e.target).attr('id');
+              changeBoardData(droppedTile,loc);
+              let newHandTile = newTile(id);
+              MyHand.splice(id,0, newHandTile);
+              MyHand.splice(id+1,1);
+              ui.draggable.detach();
+              // ui.draggable.removeClass('hand-cell');
+              // ui.draggable.addClass('board-tile');
+              // ui.draggable.detach().appendTo($(e.target));
+              // function changing base occupancy
+              // console.log(myGameData.board, "board in drop function");
+            }
+            });
         jq.css('left', left);
         jq.css('top', top);
-        BaseContainer.append(jq);  // putting more els on the DOM
-        Bases.push(jq);            // storing them in an array // can i retrieve profile?
-      });
-      Board.append(BaseContainer);
-    };
+        Board.append(jq);
+      }
+    }
+  };
 
-    drawBases();
+  drawBoardCells(30,15,15);
+
+  let drawHandCells = function (player,size,num,rot) {
+    for (i=0;i<num;i++){
+      let tile = {};
+      // let left = size*i;
+      let jq = $(`<div class= "cell hand-cell" id= "h-${i}" >`)
+        .draggable({
+          helper: "clone"
+        });
+      // jq.css('left', left);
+      tile.rotation = 0;
+      jq.css('transform', 'rotate('+tile.rotation+'deg)');
+      jq.css('transition', 'transform 0.5s');
+      tile.id = i;
+      tile.jq = jq;
+      Hand.append(jq);  // we have put els on the DOM
+      MyHand.push(tile);
+    };
+  };
+
+  drawHandCells(iAmPlayer, 30, 4, 0);
+
+  // btw
+  PlayerDeck = myGameData.player.deck;
+
+  let dealHand = function() {
+    // console.log(JSON.stringify(gameData) + " in dealHand");
+    let hand = myGameData.player.hand;
+
+    console.log(hand);
+
+    MyHand.forEach((tile,i) => {
+      tile.type = hand[i].type;
+      tile.code = hand[i].code;
+      tile.rotcode = hand[i].rotcode;
+      tile.name = hand[i].name;
+      let jq = tile.jq;
+      let imgClassName = `p${iAmPlayer}${tile.name}`;
+      tile.img = imgClassName;
+      jq.addClass(imgClassName);
+    })
+  };
+
+  dealHand();
+
+  let drawBases = function() {
+    // this is fine for drawing bases, but what about updating base color and owner?
+    let bases = myGameData.board.bases;
+    bases.forEach((base,i) => {
+      console.log(base);
+      let top = 30*base.loc.split('-')[0]-7;
+      let left = 30*base.loc.split('-')[1]-7;
+      let jq = $(`<div class= "base" id= "b-${i}" profile= "${base.loc}" >`);
+      jq.css('left', left);
+      jq.css('top', top);
+      BaseContainer.append(jq);  // putting more els on the DOM
+      Bases.push(jq);            // storing them in an array // can i retrieve profile?
+    });
+    Board.append(BaseContainer);
+  };
+
+  drawBases();
 }; // startGame
 
 

@@ -109,8 +109,10 @@ let gameInit = function () {
     let possibleLocations = gridBorders(bSize);
     let bases = [];
     for (let i = 0; i < num; i++) {
+      let base = {};
       let ran = randMax(possibleLocations.length-1);
-      let base = possibleLocations.splice(ran, 1)[0];
+      base.loc = possibleLocations.splice(ran, 1)[0];
+      base.occ = 0;
       bases.push(base);
     }
     return bases;
@@ -118,8 +120,14 @@ let gameInit = function () {
 
   let buildBoard = function (bsize) {
     let board = {};
-    board.p1occupied = [];
-    board.p2occupied = [];
+    board.mat = [];
+    for (i=0;i<bsize;i++) {
+      let row = [];
+      for (j=0;j<bsize;j++) {
+        row.push([]);
+      }
+      board.mat.push(row);
+    }
     board.bases = placeBases(15,15);
     return board;
   }
@@ -182,11 +190,11 @@ io.sockets.on('connection', function (socket) {
     serverGameData.games.push(JSON.parse(JSON.stringify( gameInit() ) ) );
     console.log("game initiated on server");
     if (clients.length===2){
-      io.sockets.in(room).emit('get game data');
+      io.sockets.in(room).emit('get init data');
     }
   });
 
-  socket.on('get new game data', function(playerNumber){
+  socket.on('get your game data', function(playerNumber){
     // console.log(serverGameData.games[0], "in get new game data");
       let playerData = {};
       playerData.playerNum = playerNumber;
@@ -196,7 +204,7 @@ io.sockets.on('connection', function (socket) {
       } else if (playerNumber===2){
         playerData.player = serverGameData.games[0].player2;
       } else {
-        console.log("no player number in get new game data");
+        console.log("no player number in get your game data");
       }
       socket.emit('start game', playerData);
   });
@@ -207,10 +215,7 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('update game data', function(data) {
-    // relies on data.room, added that in client script... is it working?
-    // how to test this?
-
-    console.log('Making my move!', data);  // data here should be the same as game
+    // console.log('a player made a move', data);  // data here should be the same as game
     io.sockets.in(data.room).emit('get game data', data);
   });
 
