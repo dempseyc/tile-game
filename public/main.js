@@ -216,7 +216,7 @@ let startGame = function () {
     }
   };
 
-  drawBoardCells(30,15,15);
+  drawBoardCells(45,10,10);
 
   let drawHandCells = function (player,size,num,rot) {
     for (i=0;i<num;i++){
@@ -237,7 +237,7 @@ let startGame = function () {
     };
   };
 
-  drawHandCells(iAmPlayer, 30, 4, 0);
+  drawHandCells(iAmPlayer, 45, 4, 0);
 
   // btw
   PlayerDeck = myGameData.player.deck;
@@ -267,8 +267,8 @@ let startGame = function () {
     let bases = myGameData.board.bases;
     bases.forEach((base,i) => {
       console.log(base);
-      let top = 30*base.loc.split('-')[0]-7;
-      let left = 30*base.loc.split('-')[1]-7;
+      let top = 45*base.loc.split('-')[0]-7;
+      let left = 45*base.loc.split('-')[1]-7;
       let jq = $(`<div class= "base" id= "b-${i}" profile= "${base.loc}" >`);
       jq.css('left', left);
       jq.css('top', top);

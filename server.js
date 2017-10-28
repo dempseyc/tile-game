@@ -54,7 +54,7 @@ let gameInit = function () {
 
   let buildDeck = function (p) {
     let profiles = buildTileProfiles(p);
-    let deckSize = 20; //135
+    let deckSize = 60; //135
     let deck = [];
     for (let i=0;i<deckSize;i++) {
       let num = ranTileNum();
@@ -77,8 +77,6 @@ let gameInit = function () {
     let player = {};
     player.deck = buildDeck(p);
     player.hand = drawHand(player.deck,4);
-    player.tilerotation = 0;
-    player.bases = [];
     return player;
   }
 
@@ -128,14 +126,14 @@ let gameInit = function () {
       }
       board.mat.push(row);
     }
-    board.bases = placeBases(15,15);
+    board.bases = placeBases(15,10);
     return board;
   }
 
   let init = function () {
     game.player1 = buildPlayer(1);
     game.player2 = buildPlayer(2);
-    game.board = buildBoard(15);
+    game.board = buildBoard(10);
     // game.whosturn = 1 initially
     return game;
   }

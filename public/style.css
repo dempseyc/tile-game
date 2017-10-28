@@ -12,8 +12,8 @@ body {
 
 #rotate-button {
   background-color: white;
-  height: 30px;
-  width: 30px;
+  height: 45px;
+  width: 45px;
 }
 
 #board-grid {
@@ -25,16 +25,16 @@ body {
 }
 
 .cell {
-  height: 30px;
-  width: 30px;
+  height: 45px;
+  width: 45px;
   border: 2px solid white;
   margin: -2px -2px -2px -2px;
   float: left;
 }
 
 .tile {
-  height: 30px;
-  width: 30px;
+  height: 45px;
+  width: 45px;
 /*  border: 2px solid white;*/
 /*border determined by jq stuff*/
   margin: -2px -2px -2px -2px;
@@ -58,8 +58,8 @@ body {
 }
 
 #hand-grid {
-  height: 50px;
-  width: 250px;
+  height: 65px;
+  width: 375px;
   margin: 0 auto;
   margin-bottom: 10px;
   border: 2px solid blue;
@@ -67,8 +67,8 @@ body {
 }
 
 .hand-cell {
-  height: 30px;
-  width: 30px;
+  height: 45px;
+  width: 45px;
   border: 2px solid white;
   margin: 10px 10px 10px 10px;
   float: left;
@@ -82,106 +82,91 @@ body {
   border: 2px solid green;
 }
 
-.pointer-cell-container {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.pointer-cell {
-  position: absolute;
-  height: 30px;
-  width: 30px;
-  border: 2px solid white;
-}
-
 
 
 /*image classNames*/
 
 .p1cross {
   background-image: url('./images/p1cross.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p1left-hook {
   background-image: url('./images/p1left-hook.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p1one-corner {
   background-image: url('./images/p1one-corner.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p1opposite-corners {
   background-image: url('./images/p1opposite-corners.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p1right-hook {
   background-image: url('./images/p1right-hook.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p1straight {
   background-image: url('./images/p1straight.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p1two-corners-same-side {
   background-image: url('./images/p1two-corners-same-side.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2cross {
   background-image: url('./images/p2cross.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2left-hook {
   background-image: url('./images/p2left-hook.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2one-corner {
   background-image: url('./images/p2one-corner.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2opposite-corners {
   background-image: url('./images/p2opposite-corners.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2right-hook {
   background-image: url('./images/p2right-hook.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2straight {
   background-image: url('./images/p2straight.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
 .p2two-corners-same-side {
   background-image: url('./images/p2two-corners-same-side.gif');
-  background-size: 30px;
-  height: 30px;
-  width: 30px;
+  background-size: 45px;
+  height: 45px;
+  width: 45px;
 }
